@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sponsor Registration // Event Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Chakra+Petch:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     THEME TOKENS — overwritten per-brand via [data-brand]
+     ============================================================ */
+  :root {
+    --accent:        #00e5ff;
+    --accent-2:      #2979ff;
+    --accent-soft:   rgba(0, 229, 255, 0.14);
+    --glow:          0 0 18px rgba(0, 229, 255, 0.55);
+
+    --bg:            #06070d;
+    --bg-2:          #0b0e1a;
+    --panel:         rgba(16, 20, 34, 0.78);
+    --panel-line:    rgba(255, 255, 255, 0.08);
+    --ink:           #eef2ff;
+    --ink-dim:       #9aa3c4;
+    --ink-faint:     #5b6488;
+    --danger:        #ff4d6d;
+    --ok:            #22e6a4;
+
+    --radius:        4px;
+    --maxw:          920px;
+    --font-display:  'Orbitron', sans-serif;
+    --font-head:     'Rajdhani', sans-serif;
+    --font-body:     'Chakra Petch', sans-serif;
+  }
+
+  /* ---- Uncle Kim :: logo yellow + red ---- */
+  [data-brand="uncle-kim"] {
+    --accent:      #ffd000;
+    --accent-2:    #ff2e2e;
+    --accent-soft: rgba(255, 208, 0, 0.13);
+    --glow:        0 0 18px rgba(255, 208, 0, 0.5);
+  }
+  /* ---- Macks Marketing :: logo red + white ---- */
+  [data-brand="macks"] {
+    --accent:      #ff2638;
+    --accent-2:    #ff7d8a;
+    --accent-soft: rgba(255, 38, 56, 0.14);
+    --glow:        0 0 18px rgba(255, 38, 56, 0.55);
+  }
+  /* ---- Kpop Portal SL :: neon magenta ---- */
+  [data-brand="kpop"] {
+    --accent:      #ff36c8;
+    --accent-2:    #a23bff;
+    --accent-soft: rgba(255, 54, 200, 0.14);
+    --glow:        0 0 18px rgba(255, 54, 200, 0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(41,121,255,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, var(--accent-soft), transparent 55%),
+      linear-gradient(180deg, var(--bg), var(--bg-2));
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background 0.6s ease;
+  }
+
+  /* Speed-line / grid atmosphere overlay */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(0deg,  rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: radial-gradient(circle at 50% 0%, black, transparent 78%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Diagonal racing streaks */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      115deg,
+      transparent 0 60px,
+      var(--accent-soft) 60px 61px,
+      transparent 61px 130px
+    );
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+    transition: background 0.6s ease;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; padding: 48px 20px 96px; }
+
+  /* ============================================================ HEADER */
+  header.hero { margin-bottom: 40px; }
+  .kicker {
+    font-family: var(--font-body);
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--accent);
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .kicker::before { content: ""; width: 28px; height: 1px; background: var(--accent); box-shadow: var(--glow); }
+
+  h1.title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(30px, 6vw, 58px);
+    line-height: 0.98;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  h1.title span { color: var(--accent); text-shadow: var(--glow); }
+  .subtitle { color: var(--ink-dim); margin-top: 12px; max-width: 560px; font-size: 15px; }
+
+  /* progress rail */
+  .rail { display: flex; gap: 8px; margin-top: 26px; flex-wrap: wrap; }
+  .rail .pip {
+    font-family: var(--font-head); font-weight: 700; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 7px 14px;
+    border: 1px solid var(--panel-line);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    display: flex; align-items: center; gap: 8px;
+    transition: 0.3s;
+  }
+  .rail .pip.active { color: var(--ink); border-color: var(--accent); box-shadow: var(--glow); }
+  .rail .pip .n { color: var(--accent); }
+
+  /* ============================================================ PANELS */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius);
+    backdrop-filter: blur(8px);
+    padding: 28px;
+    margin-top: 22px;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  }
+  .panel.locked { opacity: 0.38; filter: grayscale(0.5); pointer-events: none; }
+  .panel.locked .lockbadge { display: inline-flex; }
+
+  .panel-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .panel-num {
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+    color: var(--accent); letter-spacing: 0.1em;
+  }
+  .panel-title { font-family: var(--font-head); font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .panel-desc { color: var(--ink-dim); font-size: 14px; margin-bottom: 22px; }
+  .lockbadge {
+    display: none; align-items: center; gap: 6px; margin-left: auto;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint);
+    border: 1px dashed var(--panel-line); padding: 4px 10px; border-radius: 3px;
+  }
+
+  /* ============================================================ BRAND CARDS */
+  .brands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 680px){ .brands { grid-template-columns: 1fr; } }
+
+  .brand-card {
+    --c: #00e5ff;
+    cursor: pointer; text-align: left;
+    color: var(--ink);
+    background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius);
+    padding: 20px 18px 18px;
+    position: relative; overflow: hidden;
+    transition: 0.25s ease;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .brand-card::after {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--c); box-shadow: 0 0 16px var(--c); opacity: 0.85;
+  }
+  .brand-card:hover { transform: translateY(-4px); border-color: var(--c); box-shadow: 0 14px 34px rgba(0,0,0,0.4); }
+  .brand-card.selected { border-color: var(--c); box-shadow: 0 0 0 1px var(--c), 0 0 28px -4px var(--c); }
+  .brand-card.selected::before {
+    content: "SELECTED"; position: absolute; top: 10px; right: 10px;
+    font-size: 9px; letter-spacing: 0.2em; color: #06070d; background: var(--c);
+    padding: 3px 7px; font-family: var(--font-head); font-weight: 700; border-radius: 2px;
+  }
+
+  /* brand logos (real assets) */
+  .brand-logo {
+    height: 76px; display: flex; align-items: center; margin-bottom: 14px;
+  }
+  .brand-logo img {
+    max-height: 76px; max-width: 100%; object-fit: contain;
+    border-radius: 6px; background: #fff1; padding: 4px;
+  }
+
+  .brand-name { font-family: var(--font-head); font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: 0.05em; color: #ffffff; }
+  .brand-card.selected .brand-name { color: var(--c); text-shadow: 0 0 12px var(--c); }
+
+  /* active brand banner inside step 1 once chosen */
+  .brand-banner {
+    display: none; align-items: center; gap: 18px; margin-top: 22px;
+    padding: 16px 20px; border: 1px solid var(--accent); border-radius: var(--radius);
+    background: var(--accent-soft);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .brand-banner.show { display: flex; }
+  .brand-banner img.blogo {
+    height: 52px; max-width: 120px; object-fit: contain;
+    border-radius: 6px; background: #fff1; padding: 4px;
+  }
+  .brand-banner .btext small { display:block; font-size: 11px; letter-spacing:0.22em; color: var(--ink-dim); text-transform: uppercase; }
+  .brand-banner .btext strong { font-family: var(--font-head); font-size: 18px; letter-spacing: 0.04em; }
+
+  /* ============================================================ FORM FIELDS */
+  label.fld { display: block; margin-bottom: 18px; }
+  .fld > span.lbl {
+    display: block; font-family: var(--font-head); font-weight: 600; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 8px;
+  }
+  .fld > span.lbl b { color: var(--accent); }
+
+  input[type="text"], input[type="number"], input[type="tel"], select {
+    width: 100%; padding: 13px 14px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius);
+    color: var(--ink); font-family: var(--font-body); font-size: 15px;
+    transition: 0.2s;
+  }
+  input:focus, select:focus {
+    outline: none; border-color: var(--accent); box-shadow: var(--glow);
+    background: rgba(0,0,0,0.5);
+  }
+  select { appearance: none; cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 19px, calc(100% - 14px) 19px;
+    background-size: 6px 6px, 6px 6px; background-repeat: no-repeat;
+  }
+  option { background: #0b0e1a; }
+
+  /* file inputs */
+  .filebox {
+    position: relative; border: 1px dashed var(--panel-line); border-radius: var(--radius);
+    padding: 16px; background: rgba(0,0,0,0.25); transition: 0.2s; cursor: pointer;
+  }
+  .filebox:hover { border-color: var(--accent); }
+  .filebox input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width:100%; height:100%; }
+  .filebox .fb-inner { display: flex; align-items: center; gap: 12px; pointer-events: none; }
+  .filebox .fb-icon { font-size: 20px; color: var(--accent); }
+  .filebox .fb-text { font-size: 13px; color: var(--ink-dim); }
+  .filebox .fb-text b { color: var(--ink); }
+  .filelist { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .filelist .fitem {
+    font-size: 12px; color: var(--ink); background: rgba(255,255,255,0.05);
+    padding: 6px 10px; border-radius: 3px; border-left: 2px solid var(--accent);
+    display: flex; justify-content: space-between; gap: 10px;
+  }
+  .filelist .fitem span.sz { color: var(--ink-faint); }
+  .filelist .fitem .rm {
+    cursor: pointer; color: var(--ink-faint); font-weight: 700; padding: 0 4px;
+    transition: 0.15s; line-height: 1;
+  }
+  .filelist .fitem .rm:hover { color: var(--danger); }
+  .filelist .fitem .meta { display: flex; align-items: center; gap: 12px; }
+
+  /* segmented radio choices */
+  .seg { display: flex; gap: 10px; flex-wrap: wrap; }
+  .seg label {
+    flex: 1; min-width: 120px; cursor: pointer; position: relative;
+  }
+  .seg input { position: absolute; opacity: 0; }
+  .seg .opt {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px; border: 1px solid var(--panel-line); border-radius: var(--radius);
+    font-family: var(--font-head); font-weight: 600; font-size: 13px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-dim); transition: 0.2s; text-align: center;
+  }
+  .seg label:hover .opt { border-color: var(--accent); color: var(--ink); }
+  .seg input:checked + .opt {
+    border-color: var(--accent); color: var(--ink); background: var(--accent-soft); box-shadow: var(--glow);
+  }
+  .seg input:checked + .opt::before { content: "▸ "; color: var(--accent); }
+
+  /* ============================================================ REP COUNT */
+  .counter { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .stepper {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.38); border: 1px solid var(--panel-line);
+    border-radius: var(--radius); padding: 8px;
+  }
+  .counter button {
+    width: 46px; height: 46px; font-size: 26px; font-family: var(--font-display);
+    background: rgba(0,0,0,0.4); color: var(--accent); border: 1px solid var(--accent);
+    border-radius: var(--radius); cursor: pointer; transition: 0.2s; line-height: 1;
+    display: grid; place-items: center;
+  }
+  .counter button:hover { background: var(--accent); color: #06070d; box-shadow: var(--glow); }
+  .counter button:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--panel-line); color: var(--ink-faint); box-shadow: none; background: rgba(0,0,0,0.4); }
+  .counter .count {
+    font-family: var(--font-display); font-weight: 900; font-size: 38px; min-width: 70px; text-align: center;
+    color: var(--ink); text-shadow: var(--glow);
+  }
+  .cnote {
+    flex: 1; min-width: 220px; max-width: 380px;
+    font-size: 13px; line-height: 1.6; color: var(--ink-dim);
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 14px 16px; border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .cnote b { color: var(--accent); font-family: var(--font-head); }
+  @media (max-width: 560px){ .cnote { max-width: none; } }
+
+  /* ============================================================ REP CARDS */
+  .reps { display: flex; flex-direction: column; gap: 18px; }
+  .rep-card {
+    border: 1px solid var(--panel-line); border-radius: var(--radius);
+    padding: 22px; background: rgba(0,0,0,0.22); position: relative;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    animation: slidein 0.4s ease both;
+  }
+  @keyframes slidein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .rep-card .rep-tag {
+    font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.14em;
+    color: var(--accent); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .rep-card .rep-tag::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px){ .grid2 { grid-template-columns: 1fr; } }
+
+  /* ============================================================ PAYMENT */
+  .invoice { display: flex; flex-direction: column; gap: 2px; margin-bottom: 22px; }
+  .invoice .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 16px; font-size: 14px; border-bottom: 1px solid var(--panel-line);
+  }
+  .invoice .row .desc { color: var(--ink-dim); }
+  .invoice .row .desc b { color: var(--ink); font-family: var(--font-head); }
+  .invoice .row .amt { font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+  .invoice .row.free .amt { color: var(--ok); }
+  .invoice .row.total {
+    border-bottom: none; margin-top: 6px; padding: 18px 16px;
+    background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius);
+  }
+  .invoice .row.total .desc { font-family: var(--font-head); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); font-size: 15px; }
+  .invoice .row.total .amt {
+    font-family: var(--font-display); font-weight: 900; font-size: 26px; color: var(--accent); text-shadow: var(--glow);
+  }
+  .cur { font-size: 0.62em; color: var(--ink-dim); margin-right: 4px; font-family: var(--font-body); }
+
+  /* ============================================================ SUBMIT */
+  .submit-wrap { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+  button.submit {
+    font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #06070d; cursor: pointer;
+    background: linear-gradient(100deg, var(--accent), var(--accent-2));
+    border: none; padding: 18px 40px; border-radius: var(--radius);
+    box-shadow: var(--glow); transition: 0.2s; position: relative; overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  button.submit:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  button.submit:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.6); transform: none; }
+
+  /* ---- submitting state: animated racing button ---- */
+  button.submit.loading {
+    opacity: 1 !important; filter: none !important; transform: none; cursor: progress;
+    display: inline-flex; align-items: center; gap: 12px; min-width: 320px; justify-content: center;
+    background: linear-gradient(100deg, var(--accent), var(--accent-2), var(--accent));
+    background-size: 220% 100%;
+    animation: btnflow 1.2s linear infinite;
+  }
+  @keyframes btnflow { 0% { background-position: 0% 0; } 100% { background-position: 220% 0; } }
+  /* sweeping light streak */
+  button.submit.loading::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent 25%, rgba(255,255,255,0.55) 50%, transparent 75%);
+    transform: translateX(-120%);
+    animation: btnsweep 1.2s ease-in-out infinite;
+  }
+  @keyframes btnsweep { to { transform: translateX(120%); } }
+  .btn-spin {
+    width: 17px; height: 17px; flex: none; border-radius: 50%;
+    border: 2px solid rgba(6,7,13,0.3); border-top-color: #06070d;
+    position: relative; z-index: 1; animation: btnspin 0.65s linear infinite;
+  }
+  @keyframes btnspin { to { transform: rotate(360deg); } }
+  .btn-msg { position: relative; z-index: 1; transition: opacity 0.2s ease; white-space: nowrap; }
+
+  .formnote { font-size: 12px; color: var(--ink-faint); max-width: 520px; }
+
+  /* success */
+  .done {
+    display: none; text-align: center; padding: 60px 20px; animation: slidein 0.5s ease;
+  }
+  .done.show { display: block; }
+  .done .check { font-size: 64px; color: var(--ok); text-shadow: 0 0 24px var(--ok); }
+  .done h2 { font-family: var(--font-display); font-weight: 900; font-size: 30px; margin: 16px 0 8px; text-transform: uppercase; }
+  .done p { color: var(--ink-dim); }
+
+  .err { color: var(--danger); font-size: 12px; margin-top: 6px; display: none; }
+  .err.show { display: block; }
+
+  footer.foot { text-align: center; margin-top: 50px; color: var(--ink-faint); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; }
+
+  /* ============================================================ EVENT LOGO */
+  .event-logo {
+    height: 92px; width: auto; max-width: 100%; object-fit: contain;
+    margin-bottom: 18px; display: block;
+    filter: drop-shadow(0 0 22px rgba(120, 90, 255, 0.45));
+  }
+
+  /* ============================================================ CODE GATE */
+  .code-gate {
+    display: none; margin-top: 22px; padding: 22px;
+    border: 1px solid var(--accent); border-radius: var(--radius);
+    background: var(--accent-soft);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .code-gate.show { display: block; animation: slidein 0.35s ease; }
+  .code-gate.shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-7px)} 40%,80%{transform:translateX(7px)}
+  }
+  .code-gate .cg-label {
+    font-family: var(--font-head); font-weight: 700; font-size: 14px;
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .code-gate .cg-sub { font-size: 12px; color: var(--ink-dim); margin-bottom: 14px; }
+  .code-gate .cg-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .code-gate input {
+    flex: 1; min-width: 180px; padding: 13px 14px; letter-spacing: 0.18em;
+    background: rgba(0,0,0,0.45); border: 1px solid var(--panel-line);
+    border-radius: var(--radius); color: var(--ink); font-family: var(--font-body); font-size: 16px;
+  }
+  .code-gate input:focus { outline: none; border-color: var(--accent); box-shadow: var(--glow); }
+  .code-gate button {
+    font-family: var(--font-head); font-weight: 700; font-size: 14px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #06070d; cursor: pointer; white-space: nowrap;
+    background: linear-gradient(100deg, var(--accent), var(--accent-2));
+    border: none; padding: 0 26px; border-radius: var(--radius); box-shadow: var(--glow);
+    transition: 0.2s;
+  }
+  .code-gate button:hover { filter: brightness(1.1); }
+  .code-gate button:disabled { opacity: 0.5; cursor: progress; }
+  .code-gate .cg-err {
+    color: var(--danger); font-size: 13px; margin-top: 12px; display: none;
+    font-family: var(--font-head); font-weight: 600; letter-spacing: 0.04em;
+  }
+  .code-gate .cg-err.show { display: block; }
+  .code-gate.unlocked { border-color: var(--ok); }
+  .code-gate.unlocked .cg-row, .code-gate.unlocked .cg-sub { display: none; }
+  .code-gate .cg-ok {
+    display: none; align-items: center; gap: 8px; color: var(--ok);
+    font-family: var(--font-head); font-weight: 700; letter-spacing: 0.06em; margin-top: 4px;
+  }
+  .code-gate.unlocked .cg-ok { display: flex; }
+
+  /* ============================================================ EARLY BIRD */
+  .earlybird {
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+    padding: 16px 18px; margin-bottom: 22px;
+    border: 1px solid var(--panel-line); border-radius: var(--radius);
+    background: rgba(0,0,0,0.25); transition: 0.2s;
+  }
+  .earlybird:hover { border-color: var(--accent); }
+  .earlybird.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--glow); }
+  .earlybird input { position: absolute; opacity: 0; }
+  .earlybird .box {
+    width: 26px; height: 26px; flex: none; border: 2px solid var(--accent);
+    border-radius: 4px; display: grid; place-items: center; color: #06070d;
+    font-weight: 900; font-size: 16px; transition: 0.2s; background: transparent;
+  }
+  .earlybird.on .box { background: var(--accent); box-shadow: var(--glow); }
+  .earlybird .box::after { content: "✓"; opacity: 0; transition: 0.15s; }
+  .earlybird.on .box::after { opacity: 1; }
+  .earlybird .eb-text { font-family: var(--font-head); font-weight: 600; font-size: 15px; letter-spacing: 0.03em; }
+  .earlybird .eb-text small { display: block; color: var(--ink-dim); font-size: 12px; font-weight: 400; letter-spacing: 0; margin-top: 2px; }
+
+  /* ============================================================ FREEBIE EXTRA */
+  .freebie-extra {
+    margin-top: 16px; padding: 18px 18px 2px; border-left: 2px solid var(--accent);
+    background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0;
+    animation: slidein 0.3s ease;
+  }
+  .freebie-extra .fx-head {
+    font-family: var(--font-head); font-weight: 700; font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .lbl .nm { color: var(--accent); font-style: normal; }
+
+  /* ============================================================ CONTACT NUMBERS */
+  .phone-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .phone-row input { flex: 1; }
+  .phone-rm {
+    width: 48px; flex: none; background: rgba(0,0,0,0.4); border: 1px solid var(--panel-line);
+    color: var(--ink-dim); border-radius: var(--radius); cursor: pointer; font-size: 16px; transition: 0.2s;
+  }
+  .phone-rm:hover { border-color: var(--danger); color: var(--danger); }
+  .addbtn {
+    background: none; border: 1px dashed var(--panel-line); color: var(--accent);
+    padding: 10px 16px; border-radius: var(--radius); cursor: pointer;
+    font-family: var(--font-head); font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; font-size: 12px; transition: 0.2s;
+  }
+  .addbtn:hover { border-color: var(--accent); box-shadow: var(--glow); }
+
+  /* ============================================================ BANK DETAILS */
+  .bank {
+    border: 1px solid var(--panel-line); border-radius: var(--radius);
+    background: rgba(0,0,0,0.3); padding: 22px; margin: 22px 0;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .bank-head {
+    font-family: var(--font-head); font-weight: 700; font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .bank-head svg {
+    width: 22px; height: 22px; flex: none; stroke: var(--accent);
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .bank dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; margin: 0; }
+  .bank dt { color: var(--ink-dim); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-head); align-self: center; }
+  .bank dd { margin: 0; font-family: var(--font-head); font-weight: 600; font-size: 16px; color: var(--ink); }
+  .bank dd.acct { letter-spacing: 0.1em; font-size: 19px; color: var(--accent); text-shadow: var(--glow); }
+  .bank-note {
+    margin-top: 18px; padding: 12px 14px; border-left: 3px solid var(--accent);
+    background: var(--accent-soft); font-size: 13px; color: var(--ink); border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .bank-note b { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <img class="event-logo" src="ygverse.png" alt="YGVERSE" />
+    <div class="kicker">YGVERSE // Sponsor Access Terminal</div>
+    <h1 class="title">YGVERSE <span>Sponsor Onboarding</span></h1>
+    <p class="subtitle">Welcome to the YGVERSE sponsor portal. Select your brand, unlock with your access code, register your representatives, and settle your access fee.</p>
+    <div class="rail" id="rail">
+      <div class="pip active" data-step="1"><span class="n">01</span> Brand</div>
+      <div class="pip" data-step="2"><span class="n">02</span> Contact</div>
+      <div class="pip" data-step="3"><span class="n">03</span> Representatives</div>
+      <div class="pip" data-step="4"><span class="n">04</span> Details</div>
+      <div class="pip" data-step="5"><span class="n">05</span> Payment</div>
+    </div>
+  </header>
+
+  <form id="sponsorForm" novalidate>
+
+    <!-- STEP 1 — BRAND ------------------------------------------------ -->
+    <section class="panel" id="panel-brand">
+      <div class="panel-head">
+        <span class="panel-num">01</span>
+        <span class="panel-title">Select Your Brand</span>
+      </div>
+      <p class="panel-desc">Choose your sponsoring brand, then enter your private access code to unlock the form.</p>
+
+      <div class="brands" id="brands">
+        <!-- cards injected by JS -->
+      </div>
+
+      <!-- ACCESS CODE GATE -->
+      <div class="code-gate" id="codeGate">
+        <div class="cg-label" id="cgLabel">Enter access code</div>
+        <div class="cg-sub">This code was sent to you privately by the YGVERSE team.</div>
+        <div class="cg-row">
+          <input type="password" id="codeInput" placeholder="ACCESS CODE" autocomplete="off" />
+          <button type="button" id="unlockBtn">Proceed ▸</button>
+        </div>
+        <div class="cg-ok">✓ Unlocked — your details are loaded below.</div>
+        <div class="cg-err" id="codeErr">Incorrect access code. Please try again.</div>
+      </div>
+
+      <div class="brand-banner" id="brandBanner">
+        <img class="blogo" id="bannerLogo" alt="" />
+        <div class="btext">
+          <small>Active Brand</small>
+          <strong id="bannerName">—</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 — CONTACT ---------------------------------------------- -->
+    <section class="panel locked" id="panel-contact">
+      <div class="panel-head">
+        <span class="panel-num">02</span>
+        <span class="panel-title">Contact Details</span>
+        <span class="lockbadge">🔒 Unlock with code first</span>
+      </div>
+      <div class="fld" style="margin-bottom:0">
+        <span class="lbl">Contact Number(s) <b>*</b></span>
+        <div id="phoneList"></div>
+        <button type="button" class="addbtn" id="addPhone">+ Add another number</button>
+        <div class="err" id="phoneErr">Please enter at least one contact number.</div>
+      </div>
+    </section>
+
+    <!-- STEP 3 — REP COUNT -------------------------------------------- -->
+    <section class="panel locked" id="panel-count">
+      <div class="panel-head">
+        <span class="panel-num">03</span>
+        <span class="panel-title">Representatives Attending</span>
+        <span class="lockbadge">🔒 Unlock with code first</span>
+      </div>
+      <p class="panel-desc">How many representatives will attend the event?</p>
+      <div class="counter">
+        <div class="stepper">
+          <button type="button" id="decBtn" aria-label="decrease">−</button>
+          <div class="count" id="repCount">1</div>
+          <button type="button" id="incBtn" aria-label="increase">+</button>
+        </div>
+        <div class="cnote" id="freeNote">—</div>
+      </div>
+    </section>
+
+    <!-- STEP 4 — REP DETAILS ------------------------------------------ -->
+    <section class="panel locked" id="panel-details">
+      <div class="panel-head">
+        <span class="panel-num">04</span>
+        <span class="panel-title">Representative Details</span>
+        <span class="lockbadge">🔒 Unlock with code first</span>
+      </div>
+      <p class="panel-desc">Provide the details and a form of identification (NIC, passport, etc.) for each representative.</p>
+      <div class="reps" id="reps"></div>
+    </section>
+
+    <!-- STEP 5 — PAYMENT ---------------------------------------------- -->
+    <section class="panel locked" id="panel-payment">
+      <div class="panel-head">
+        <span class="panel-num">05</span>
+        <span class="panel-title">Payment</span>
+        <span class="lockbadge">🔒 Unlock with code first</span>
+      </div>
+      <p class="panel-desc">Review the breakdown below and attach your payment slip(s). Multiple slips are accepted.</p>
+
+      <label class="earlybird" id="earlyBird">
+        <input type="checkbox" id="ebCheck" />
+        <span class="box"></span>
+        <span class="eb-text">Purchased during the early bird offer
+          <small>Tickets are LKR 2,800 each instead of LKR 2,900</small>
+        </span>
+      </label>
+
+      <div class="invoice" id="invoice"><!-- rows injected --></div>
+
+      <div class="bank">
+        <div class="bank-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 9.5 12 4l9 5.5"/>
+            <path d="M4 9.5h16"/>
+            <path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/>
+            <path d="M3 21h18"/>
+          </svg>
+          <span>Deposit To</span>
+        </div>
+        <dl>
+          <dt>Account No</dt><dd class="acct">121857252910</dd>
+          <dt>Name</dt><dd>Anjala Botejue</dd>
+          <dt>Bank</dt><dd>Sampath Bank</dd>
+          <dt>Branch</dt><dd>Borella Super</dd>
+        </dl>
+        <div class="bank-note"><b>⚠ Please add your Brand name as the reference</b> when depositing.</div>
+      </div>
+
+      <label class="fld">
+        <span class="lbl">Payment Slip(s) <b>*</b> — multiple files allowed</span>
+        <div class="filebox">
+          <input type="file" id="slips" multiple accept="image/*,.pdf" />
+          <div class="fb-inner">
+            <span class="fb-icon">⬆</span>
+            <span class="fb-text"><b>Drop or click to upload</b> — JPG, PNG or PDF</span>
+          </div>
+        </div>
+        <div class="filelist" id="slipList"></div>
+        <div class="err" id="slipErr">At least one payment slip is required.</div>
+      </label>
+
+      <div class="submit-wrap">
+        <button type="submit" class="submit" id="submitBtn">▸ Submit</button>
+        <p class="formnote">By Submiting you confirm all representative details and uploaded documents are accurate. Files are handled by our event team after submission.</p>
+      </div>
+    </section>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="done" id="done">
+    <div class="check">✓</div>
+    <h2>Submitted</h2>
+    <p id="doneMsg">Your sponsor registration has been received.</p>
+  </div>
+
+  <footer class="foot">Event Sponsor Terminal</footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const TICKET_PRICE = 2900;
+const EARLY_BIRD_PRICE = 2800;
+
+/* Paste your deployed Google Apps Script Web App URL here.
+   Leave it as "" to run in demo mode (no data is sent). */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8hlYZYp2gLwK7XGWsKCowHsnuHyMtT84fcrzhfVib9eOY87nUWUFpW20c8dxPxHw/exec";
+
+/* PUBLIC brand info only. Sponsorship amounts, free-ticket counts and
+   access codes are NOT here — they live server-side and are returned only
+   after a correct access code is entered. */
+const BRANDS = {
+  "uncle-kim": { name: "Uncle Kim",      theme: "uncle-kim", color: "#ffd000", logo: "uncle_kim.png" },
+  "macks":     { name: "Macks Marketing", theme: "macks",     color: "#ff2638", logo: "Macks%20marketing.jpg" },
+  "kpop":      { name: "Kpop Portal SL",  theme: "kpop",      color: "#ff36c8", logo: "sl_kpop_portal.jpg" }
+};
+
+/* ---- DEMO-ONLY fallback (used ONLY when SCRIPT_URL === "") ----
+   These are FAKE placeholder values purely so the UI flow can be tested
+   offline. The REAL codes and amounts live only in Code.gs on the server
+   and are never present in this file. Offline test code for every brand
+   is simply "DEMO". */
+const LOCAL_SECRETS = {
+  "uncle-kim": { code: "DEMO", sponsorship: 0, freeTickets: 2 },
+  "macks":     { code: "DEMO", sponsorship: 0, freeTickets: 1 },
+  "kpop":      { code: "DEMO", sponsorship: 0, freeTickets: 1 }
+};
+
+const MAX_REPS = 12;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  brand: null,
+  reps: 1,
+  secret: null,    // {sponsorship, freeTickets} — filled after code unlock
+  code: null,      // the verified access code (sent again on submit)
+  earlyBird: false // early-bird ticket pricing
+};
+
+const currentTicketPrice = () => state.earlyBird ? EARLY_BIRD_PRICE : TICKET_PRICE;
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const money = n => n.toLocaleString("en-LK");
+const fileSize = b => b < 1024*1024 ? (b/1024).toFixed(0)+" KB" : (b/1048576).toFixed(1)+" MB";
+
+/* ============================================================
+   1. BUILD BRAND CARDS
+   ============================================================ */
+const brandsEl = $("#brands");
+Object.entries(BRANDS).forEach(([key, b]) => {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "brand-card";
+  card.dataset.key = key;
+  card.style.setProperty("--c", b.color);
+  card.innerHTML = `
+    <div class="brand-logo"><img src="${b.logo}" alt="${b.name} logo" /></div>
+    <div class="brand-name">${b.name}</div>
+  `;
+  card.addEventListener("click", () => selectBrand(key));
+  brandsEl.appendChild(card);
+});
+
+function selectBrand(key){
+  const b = BRANDS[key];
+  state.brand  = key;
+  state.secret = null;          // reset any previous unlock
+  state.code   = null;
+
+  // theme the whole document
+  document.documentElement.setAttribute("data-brand", b.theme);
+
+  // mark selected card
+  $$(".brand-card").forEach(c => c.classList.toggle("selected", c.dataset.key === key));
+
+  // re-lock everything until the code is verified
+  $("#brandBanner").classList.remove("show");
+  ["panel-contact","panel-count","panel-details","panel-payment"].forEach(id => $("#"+id).classList.add("locked"));
+  renderInvoice();   // clears any stale invoice (secret is null now)
+
+  // show the code gate for this brand
+  const gate = $("#codeGate");
+  gate.classList.remove("unlocked");
+  $("#codeErr").classList.remove("show");
+  $("#cgLabel").textContent = `Enter access code for ${b.name}`;
+  $("#codeInput").value = "";
+  $("#unlockBtn").disabled = false;
+  gate.classList.add("show");
+  $("#codeInput").focus();
+
+  markStep(1);
+}
+
+/* ---- verify the access code against the server (or local demo) ---- */
+async function verifyBrand(brandKey, code){
+  if (SCRIPT_URL){
+    const resp = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "verify", brandKey, code })
+    });
+    return await resp.json();   // {ok, sponsorship, freeTickets} | {ok:false}
+  }
+  // demo fallback
+  await new Promise(r => setTimeout(r, 400));
+  const s = LOCAL_SECRETS[brandKey];
+  if (s && code.trim().toUpperCase() === s.code.toUpperCase()){
+    return { ok: true, sponsorship: s.sponsorship, freeTickets: s.freeTickets };
+  }
+  return { ok: false };
+}
+
+async function unlockBrand(){
+  if (!state.brand) return;
+  const code = $("#codeInput").value.trim();
+  const gate = $("#codeGate");
+  const err  = $("#codeErr");
+  const btn  = $("#unlockBtn");
+  err.classList.remove("show");
+
+  if (!code){ err.textContent = "Please enter your access code."; err.classList.add("show"); return; }
+
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = "Checking…";
+
+  try {
+    const res = await verifyBrand(state.brand, code);
+    if (!res || !res.ok){
+      btn.disabled = false; btn.textContent = orig;
+      err.textContent = "Incorrect access code. Please try again.";
+      err.classList.add("show");
+      gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake");
+      return;
+    }
+
+    // success — store secret + reveal everything
+    state.secret = { sponsorship: res.sponsorship, freeTickets: res.freeTickets };
+    state.code   = code;
+
+    const b = BRANDS[state.brand];
+    $("#bannerLogo").src = b.logo;
+    $("#bannerLogo").alt = b.name + " logo";
+    $("#bannerName").textContent = b.name;
+    $("#brandBanner").classList.add("show");
+
+    gate.classList.add("unlocked");
+    btn.textContent = orig;
+
+    ["panel-contact","panel-count","panel-details","panel-payment"].forEach(id => $("#"+id).classList.remove("locked"));
+
+    updateFreeNote();
+    buildReps();
+    renderInvoice();
+    markStep(2);
+    $("#panel-contact").scrollIntoView({ behavior: "smooth", block: "start" });
+
+  } catch(e){
+    btn.disabled = false; btn.textContent = orig;
+    err.textContent = "Could not verify right now. Check your connection and retry.";
+    err.classList.add("show");
+  }
+}
+
+$("#unlockBtn").addEventListener("click", unlockBrand);
+$("#codeInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); unlockBrand(); } });
+
+function updateFreeNote(){
+  if (!state.secret) return;
+  const ft = state.secret.freeTickets;
+  $("#freeNote").innerHTML =
+    `${BRANDS[state.brand].name} includes <b>${ft}</b> free ticket${ft>1?'s':''}. ` +
+    `Each extra ticket is <b>LKR ${money(TICKET_PRICE)}</b> ` +
+    `&mdash; or <b>LKR ${money(EARLY_BIRD_PRICE)}</b> with the early bird offer.`;
+}
+
+/* ---- early bird toggle ---- */
+$("#earlyBird").addEventListener("change", e => {
+  state.earlyBird = $("#ebCheck").checked;
+  $("#earlyBird").classList.toggle("on", state.earlyBird);
+  updateFreeNote();
+  renderInvoice();
+});
+
+/* ============================================================
+   2. REP COUNTER
+   ============================================================ */
+$("#incBtn").addEventListener("click", () => changeReps(1));
+$("#decBtn").addEventListener("click", () => changeReps(-1));
+
+function changeReps(d){
+  const next = Math.min(MAX_REPS, Math.max(1, state.reps + d));
+  if (next === state.reps) return;
+  state.reps = next;
+  $("#repCount").textContent = next;
+  $("#decBtn").disabled = next <= 1;
+  $("#incBtn").disabled = next >= MAX_REPS;
+  buildReps();
+  renderInvoice();
+}
+
+/* ============================================================
+   3. REP CARDS  (preserve already-typed values on rebuild)
+   ============================================================ */
+const repsEl = $("#reps");
+
+const esc = s => String(s||"").replace(/"/g,'&quot;');
+
+function buildReps(){
+  // capture existing text values so resizing doesn't wipe input
+  const cache = {};
+  $$(".rep-card", repsEl).forEach((card,i) => {
+    cache[i] = {
+      name:   $("input[data-f='name']", card)?.value || "",
+      meal:   $("input[data-f='meal']:checked", card)?.value || "",
+      free:   $("input[data-f='free']:checked", card)?.value || "",
+      artist: $("input[data-f='artist']", card)?.value || "",
+      bias:   $("input[data-f='bias']", card)?.value || ""
+    };
+  });
+
+  repsEl.innerHTML = "";
+  for (let i = 0; i < state.reps; i++){
+    const c = cache[i] || {};
+    const card = document.createElement("div");
+    card.className = "rep-card";
+    card.dataset.rep = i;
+    card.innerHTML = `
+      <div class="rep-tag">REPRESENTATIVE ${String(i+1).padStart(2,'0')}</div>
+      <div class="grid2">
+        <label class="fld">
+          <span class="lbl">Full Name <b>*</b></span>
+          <input type="text" data-f="name" placeholder="e.g. Alex Fernando" value="${esc(c.name)}" required />
+        </label>
+        <label class="fld">
+          <span class="lbl">Identification (NIC / Passport / Driving License) <b>*</b></span>
+          <div class="filebox">
+            <input type="file" data-f="id" accept="image/*,.pdf" required />
+            <div class="fb-inner">
+              <span class="fb-icon">🪪</span>
+              <span class="fb-text"><b>Upload ID</b> — image or PDF</span>
+            </div>
+          </div>
+          <div class="filelist" data-list="id"></div>
+        </label>
+      </div>
+
+      <label class="fld">
+        <span class="lbl">Meal Preference <b>*</b></span>
+        <div class="seg">
+          <label><input type="radio" name="meal-${i}" data-f="meal" value="Veg" ${c.meal==='Veg'?'checked':''}><span class="opt">🥗 Veg</span></label>
+          <label><input type="radio" name="meal-${i}" data-f="meal" value="Non-Veg" ${c.meal==='Non-Veg'?'checked':''}><span class="opt">🍖 Non-Veg</span></label>
+        </div>
+      </label>
+
+      <label class="fld" style="margin-bottom:0">
+        <span class="lbl">Do <span class="nm">this representative</span> want freebies? (Eg: Photocards, Postcards, Stickers) <b>*</b></span>
+        <div class="seg">
+          <label><input type="radio" name="free-${i}" data-f="free" value="Yes" ${c.free==='Yes'?'checked':''}><span class="opt">✅ Yes</span></label>
+          <label><input type="radio" name="free-${i}" data-f="free" value="No" ${c.free==='No'?'checked':''}><span class="opt">⛔ No</span></label>
+        </div>
+      </label>
+
+      <div class="freebie-extra" data-extra style="display:none">
+        <div class="fx-head">★ Freebie personalisation</div>
+        <label class="fld">
+          <span class="lbl">Who is <span class="nm">this representative</span>'s favorite YG artist? (Group or solo) <b>*</b></span>
+          <input type="text" data-f="artist" placeholder="e.g. BLACKPINK / G-Dragon" value="${esc(c.artist)}" />
+        </label>
+        <label class="fld" style="margin-bottom:0">
+          <span class="lbl">Who is <span class="nm">this representative</span>'s YG ult bias? (Please mention only one member) <b>*</b></span>
+          <input type="text" data-f="bias" placeholder="e.g. Jennie" value="${esc(c.bias)}" />
+        </label>
+      </div>
+    `;
+    repsEl.appendChild(card);
+
+    // wire id file display
+    const idInput = $("input[data-f='id']", card);
+    const idList  = $("[data-list='id']", card);
+    idInput.addEventListener("change", () => renderFileList(idInput, idList));
+
+    // dynamic name substitution in the freebie questions
+    const nameInput = $("input[data-f='name']", card);
+    nameInput.addEventListener("input", () => updateRepNames(card));
+
+    // show/hide the freebie follow-up questions
+    $$("input[data-f='free']", card).forEach(r =>
+      r.addEventListener("change", () => toggleFreebieExtra(card)));
+
+    // initialise from cached state
+    updateRepNames(card);
+    toggleFreebieExtra(card);
+  }
+}
+
+function updateRepNames(card){
+  const nm = $("input[data-f='name']", card).value.trim() || "this representative";
+  $$(".nm", card).forEach(el => el.textContent = nm);
+}
+
+function toggleFreebieExtra(card){
+  const yes = $("input[data-f='free']:checked", card)?.value === "Yes";
+  $("[data-extra]", card).style.display = yes ? "block" : "none";
+}
+
+/* ============================================================
+   4. FILE LIST RENDERING
+   ============================================================ */
+function renderFileList(input, listEl){
+  listEl.innerHTML = "";
+  [...input.files].forEach(f => {
+    const item = document.createElement("div");
+    item.className = "fitem";
+    item.innerHTML = `<span>📎 ${f.name}</span><span class="sz">${fileSize(f.size)}</span>`;
+    listEl.appendChild(item);
+  });
+}
+
+/* ---- payment slips: accumulate across multiple selections ---- */
+let slipStore = [];   // the running list of attached slip files
+const slipsInput = $("#slips");
+
+slipsInput.addEventListener("change", () => {
+  // append the newly picked files (skip exact duplicates by name+size)
+  [...slipsInput.files].forEach(f => {
+    if (!slipStore.some(x => x.name === f.name && x.size === f.size)) slipStore.push(f);
+  });
+  syncSlipInput();
+  renderSlipList();
+});
+
+function syncSlipInput(){
+  // keep the real <input> in sync so submit + validation see every file
+  const dt = new DataTransfer();
+  slipStore.forEach(f => dt.items.add(f));
+  slipsInput.files = dt.files;
+}
+
+function renderSlipList(){
+  const listEl = $("#slipList");
+  listEl.innerHTML = "";
+  slipStore.forEach((f, idx) => {
+    const item = document.createElement("div");
+    item.className = "fitem";
+    item.innerHTML =
+      `<span>📎 ${f.name}</span>
+       <span class="meta"><span class="sz">${fileSize(f.size)}</span><span class="rm" title="Remove">✕</span></span>`;
+    item.querySelector(".rm").addEventListener("click", () => {
+      slipStore.splice(idx, 1);
+      syncSlipInput();
+      renderSlipList();
+    });
+    listEl.appendChild(item);
+  });
+}
+
+/* ---- contact numbers: add / remove multiple (submission-level) ---- */
+const phoneList = $("#phoneList");
+function addPhoneRow(value=""){
+  const row = document.createElement("div");
+  row.className = "phone-row";
+  row.innerHTML =
+    `<input type="tel" data-phone placeholder="e.g. 077 123 4567" value="${esc(value)}" />
+     <button type="button" class="phone-rm" title="Remove">✕</button>`;
+  row.querySelector(".phone-rm").addEventListener("click", () => {
+    if ($$(".phone-row", phoneList).length > 1) row.remove();
+    else row.querySelector("input").value = "";   // keep at least one row
+  });
+  phoneList.appendChild(row);
+}
+$("#addPhone").addEventListener("click", () => addPhoneRow());
+addPhoneRow();   // start with one row
+
+/* read a File as base64 (no data: prefix) for transport to Apps Script */
+function fileToBase64(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res({
+      name: file.name,
+      mimeType: file.type || "application/octet-stream",
+      size: file.size,
+      data: String(r.result).split(",")[1]   // strip "data:...;base64,"
+    });
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ============================================================
+   5. INVOICE / CALCULATION
+   ============================================================
+   total = sponsorship + chargeableTickets * TICKET_PRICE
+   chargeableTickets = max(0, reps - freeTickets)
+   ============================================================ */
+function calc(){
+  if (!state.brand || !state.secret) return null;
+  const s = state.secret;
+  const reps = state.reps;
+  const price = currentTicketPrice();
+  const chargeable = Math.max(0, reps - s.freeTickets);
+  const freeUsed = Math.min(reps, s.freeTickets);
+  const ticketCost = chargeable * price;
+  return {
+    sponsorship: s.sponsorship,
+    reps, freeUsed, chargeable, ticketCost, ticketPrice: price,
+    total: s.sponsorship + ticketCost,
+    freeTickets: s.freeTickets
+  };
+}
+
+function renderInvoice(){
+  let c = calc();
+  const inv = $("#invoice");
+  // early-bird only matters when there are chargeable (paid) tickets
+  const showEB = !!(c && c.chargeable > 0);
+  if (!showEB && state.earlyBird){
+    state.earlyBird = false;            // clear stale selection
+    $("#ebCheck").checked = false;
+    $("#earlyBird").classList.remove("on");
+    c = calc();                         // recompute without early bird
+    updateFreeNote();
+  }
+  $("#earlyBird").style.display = showEB ? "flex" : "none";
+  if (!c){ inv.innerHTML = ""; return; }
+  const b = BRANDS[state.brand];
+
+  inv.innerHTML = `
+    <div class="row">
+      <div class="desc"><b>${b.name}</b> sponsorship fee</div>
+      <div class="amt"><span class="cur">LKR</span>${money(c.sponsorship)}</div>
+    </div>
+    <div class="row free">
+      <div class="desc">Free tickets applied <b>(${c.freeUsed} of ${c.freeTickets})</b></div>
+      <div class="amt">− included</div>
+    </div>
+    <div class="row">
+      <div class="desc">Chargeable tickets <b>${c.chargeable}</b> × LKR ${money(c.ticketPrice)}${state.earlyBird ? ' <b style="color:var(--ok)">(early bird)</b>' : ''}</div>
+      <div class="amt"><span class="cur">LKR</span>${money(c.ticketCost)}</div>
+    </div>
+    <div class="row total">
+      <div class="desc">Total Payable</div>
+      <div class="amt"><span class="cur">LKR</span>${money(c.total)}</div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   6. PROGRESS RAIL
+   ============================================================ */
+function markStep(step){
+  $$("#rail .pip").forEach(p => {
+    p.classList.toggle("active", Number(p.dataset.step) <= step);
+  });
+}
+// light-up rail as the user scrolls past panels / fills fields
+$("#repCount"); // noop anchor
+document.addEventListener("change", () => {
+  if (!state.brand || !state.secret) { markStep(1); return; }
+  let step = 2;
+  if ($$("input[data-phone]").some(i=>i.value.trim())) step = 3;
+  if ($$(".rep-card input[data-f='name']").some(i=>i.value.trim())) step = 4;
+  if ($("#slips").files.length) step = 5;
+  markStep(step);
+});
+
+/* ============================================================
+   7. VALIDATION + SUBMIT
+   ============================================================ */
+$("#sponsorForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  let ok = true;
+  let firstBad = null;
+
+  if (!state.brand){ alert("Please select a brand first."); return; }
+  if (!state.secret){ alert("Please unlock your brand with the access code first."); return; }
+
+  // reps
+  $$(".rep-card").forEach(card => {
+    const name = $("input[data-f='name']", card);
+    const id   = $("input[data-f='id']", card);
+    const meal = $("input[data-f='meal']:checked", card);
+    const free = $("input[data-f='free']:checked", card);
+    const artist = $("input[data-f='artist']", card);
+    const bias   = $("input[data-f='bias']", card);
+
+    [name, id, artist, bias].forEach(el => el.style.borderColor = "");
+
+    if (!name.value.trim()){ ok=false; name.style.borderColor="var(--danger)"; firstBad ??= name; }
+    if (!id.files.length){ ok=false; id.parentElement.style.borderColor="var(--danger)"; firstBad ??= id; }
+    if (!meal || !free){ ok=false; firstBad ??= card; }
+
+    // when freebies are wanted, the two follow-up questions are required
+    if (free && free.value === "Yes"){
+      if (!artist.value.trim()){ ok=false; artist.style.borderColor="var(--danger)"; firstBad ??= artist; }
+      if (!bias.value.trim()){ ok=false; bias.style.borderColor="var(--danger)"; firstBad ??= bias; }
+    }
+  });
+
+  // contact numbers (at least one)
+  const phones = $$("input[data-phone]").map(i => i.value.trim()).filter(Boolean);
+  const phoneErr = $("#phoneErr");
+  if (!phones.length){ ok=false; phoneErr.classList.add("show"); firstBad ??= $("input[data-phone]"); }
+  else phoneErr.classList.remove("show");
+
+  // slips
+  const slips = $("#slips");
+  const slipErr = $("#slipErr");
+  if (!slips.files.length){ ok=false; slipErr.classList.add("show"); firstBad ??= slips; }
+  else slipErr.classList.remove("show");
+
+  if (!ok){
+    if (firstBad?.scrollIntoView) firstBad.scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+
+  const c = calc();
+  const b = BRANDS[state.brand];
+  const btn = $("#submitBtn");
+  const orig = "▸ Submit";
+  btn.disabled = true;
+  startSubmitAnim(btn);
+
+  try {
+    // gather reps + their ID files (base64)
+    const reps = [];
+    for (const card of $$(".rep-card")){
+      const idFile = $("input[data-f='id']", card).files[0];
+      const freebies = $("input[data-f='free']:checked", card).value;
+      reps.push({
+        fullName: $("input[data-f='name']", card).value.trim(),
+        meal:     $("input[data-f='meal']:checked", card).value,
+        freebies,
+        favoriteArtist: freebies === "Yes" ? $("input[data-f='artist']", card).value.trim() : "",
+        ultBias:        freebies === "Yes" ? $("input[data-f='bias']", card).value.trim()   : "",
+        idDocument: await fileToBase64(idFile)
+      });
+    }
+    // gather payment slips (base64, multiple)
+    const slipFiles = [];
+    for (const f of [...slips.files]) slipFiles.push(await fileToBase64(f));
+
+    const payload = {
+      action: "submit",
+      code: state.code,
+      submittedAt: new Date().toISOString(),
+      brandKey: state.brand,
+      brandName: b.name,
+      contactNumbers: phones,
+      sponsorship: c.sponsorship,
+      representativeCount: c.reps,
+      freeTickets: c.freeTickets,
+      chargeableTickets: c.chargeable,
+      earlyBird: state.earlyBird,
+      ticketPrice: c.ticketPrice,
+      ticketCost: c.ticketCost,
+      totalPayable: c.total,
+      representatives: reps,
+      paymentSlips: slipFiles
+    };
+
+    if (SCRIPT_URL){
+      const resp = await fetch(SCRIPT_URL, {
+        method: "POST",
+        // text/plain avoids a CORS preflight; Apps Script parses the JSON body
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const result = await resp.json().catch(() => ({}));
+      if (result.status && result.status !== "ok"){
+        throw new Error(result.message || "Server rejected the submission.");
+      }
+    } else {
+      // demo mode — no endpoint configured
+      console.log("DEMO MODE — payload that would be sent:", payload);
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    // SUCCESS
+    stopSubmitAnim(btn, orig);
+    $("#sponsorForm").style.display = "none";
+    $("#done").classList.add("show");
+    $("#doneMsg").textContent =
+      `${b.name} · ${c.reps} representative${c.reps>1?'s':''} · Total LKR ${money(c.total)}.`;
+    markStep(5);
+    window.scrollTo({top:0, behavior:"smooth"});
+
+  } catch(err){
+    console.error(err);
+    btn.disabled = false;
+    stopSubmitAnim(btn, orig);
+    alert("Sorry — the submission could not be sent.\n\n" + err.message +
+          "\n\nPlease check your connection and try again.");
+  }
+});
+
+/* ---- submitting button animation + cycling status text ---- */
+const SUBMIT_MSGS = [
+  "Submitting your registration…",
+  "Uploading your documents…",
+  "This might take a while…",
+  "Please don't close this tab",
+  "Almost there…"
+];
+let _submitMsgTimer = null;
+
+function startSubmitAnim(btn){
+  btn.classList.add("loading");
+  btn.innerHTML = `<span class="btn-spin"></span><span class="btn-msg">${SUBMIT_MSGS[0]}</span>`;
+  const msgEl = btn.querySelector(".btn-msg");
+  let i = 0;
+  _submitMsgTimer = setInterval(() => {
+    i = (i + 1) % SUBMIT_MSGS.length;
+    msgEl.style.opacity = 0;
+    setTimeout(() => { msgEl.textContent = SUBMIT_MSGS[i]; msgEl.style.opacity = 1; }, 1000);
+  }, 6000);
+}
+
+function stopSubmitAnim(btn, label){
+  if (_submitMsgTimer){ clearInterval(_submitMsgTimer); _submitMsgTimer = null; }
+  btn.classList.remove("loading");
+  btn.innerHTML = label;
+}
+
+/* init */
+$("#decBtn").disabled = true;
+</script>
+</body>
+</html>
