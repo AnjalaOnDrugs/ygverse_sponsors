@@ -33,9 +33,11 @@ const SPREADSHEET_ID = "";   // Google Sheet that will hold the data
 const TICKET_PRICE = 2900;
 const EARLY_BIRD_PRICE = 2800;   // ticket price when bought during early bird
 const BRAND_SECRETS = {
-  "uncle-kim": { name: "Uncle Kim",       code: "UK-YG-2026", sponsorship: 25000, freeTickets: 2 },
-  "macks":     { name: "Macks Marketing", code: "MM-YG-2026", sponsorship: 20000, freeTickets: 1 },
-  "kpop":      { name: "Kpop Portal SL",  code: "KP-YG-2026", sponsorship: 10000, freeTickets: 1 }
+  "uncle-kim": { name: "Uncle Kim",         code: "UK-YG-2026", sponsorship: 25000, freeTickets: 2 },
+  "macks":     { name: "Macks Marketing",   code: "MM-YG-2026", sponsorship: 20000, freeTickets: 1 },
+  "kpop":      { name: "Kpop Portal SL",    code: "KP-YG-2026", sponsorship: 10000, freeTickets: 1 },
+  // Modeena pays in-kind (handles YGVERSE printing) — no money unless >2 reps.
+  "modeena":   { name: "Modeena Creations", code: "MC-YG-2026", sponsorship: 0,     freeTickets: 2, note: "YGVERSE printing needs (in-kind)" }
 };
 // =================================================================
 
@@ -65,7 +67,7 @@ function doPost(e) {
 function handleVerify(brandKey, code) {
   const s = BRAND_SECRETS[brandKey];
   if (s && String(code).trim().toUpperCase() === s.code.toUpperCase()) {
-    return json({ ok: true, sponsorship: s.sponsorship, freeTickets: s.freeTickets });
+    return json({ ok: true, sponsorship: s.sponsorship, freeTickets: s.freeTickets, note: s.note || "" });
   }
   return json({ ok: false });
 }

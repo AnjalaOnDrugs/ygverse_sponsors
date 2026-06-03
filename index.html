@@ -74,6 +74,13 @@
     --accent-soft: rgba(255, 54, 200, 0.14);
     --glow:        0 0 18px rgba(255, 54, 200, 0.55);
   }
+  /* ---- Modeena Creations :: elegant emerald ---- */
+  [data-brand="modeena"] {
+    --accent:      #2fd6a6;
+    --accent-2:    #0f9e90;
+    --accent-soft: rgba(47, 214, 166, 0.14);
+    --glow:        0 0 18px rgba(47, 214, 166, 0.5);
+  }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -191,8 +198,8 @@
   }
 
   /* ============================================================ BRAND CARDS */
-  .brands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 680px){ .brands { grid-template-columns: 1fr; } }
+  .brands { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+  @media (max-width: 460px){ .brands { grid-template-columns: 1fr; } }
 
   .brand-card {
     --c: #00e5ff;
@@ -560,6 +567,15 @@
     background: var(--accent-soft); font-size: 13px; color: var(--ink); border-radius: 0 var(--radius) var(--radius) 0;
   }
   .bank-note b { color: var(--accent); }
+
+  /* no-payment-needed notice */
+  .nopay {
+    display: none; margin: 4px 0 22px; padding: 16px 18px;
+    border: 1px solid var(--ok); border-radius: var(--radius);
+    background: rgba(34, 230, 164, 0.1); color: var(--ink); font-size: 14px;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .nopay b { color: var(--ok); }
 </style>
 </head>
 <body>
@@ -677,7 +693,11 @@
 
       <div class="invoice" id="invoice"><!-- rows injected --></div>
 
-      <div class="bank">
+      <div class="nopay" id="noPayMsg">
+        <b>✓ No payment required.</b> Your registration is fully covered — just submit below.
+      </div>
+
+      <div class="bank" id="bankBox">
         <div class="bank-head">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 9.5 12 4l9 5.5"/>
@@ -696,7 +716,7 @@
         <div class="bank-note"><b>⚠ Please add your Brand name as the reference</b> when depositing.</div>
       </div>
 
-      <label class="fld">
+      <label class="fld" id="slipField">
         <span class="lbl">Payment Slip(s) <b>*</b> — multiple files allowed</span>
         <div class="filebox">
           <input type="file" id="slips" multiple accept="image/*,.pdf" />
@@ -744,7 +764,8 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8hlYZYp2gLwK7XGWsK
 const BRANDS = {
   "uncle-kim": { name: "Uncle Kim",      theme: "uncle-kim", color: "#ffd000", logo: "uncle_kim.png" },
   "macks":     { name: "Macks Marketing", theme: "macks",     color: "#ff2638", logo: "Macks%20marketing.jpg" },
-  "kpop":      { name: "Kpop Portal SL",  theme: "kpop",      color: "#ff36c8", logo: "sl_kpop_portal.jpg" }
+  "kpop":      { name: "Kpop Portal SL",  theme: "kpop",      color: "#ff36c8", logo: "sl_kpop_portal.jpg" },
+  "modeena":   { name: "Modeena Creations", theme: "modeena", color: "#2fd6a6", logo: "modeena_creations.jpg" }
 };
 
 /* ---- DEMO-ONLY fallback (used ONLY when SCRIPT_URL === "") ----
@@ -755,7 +776,8 @@ const BRANDS = {
 const LOCAL_SECRETS = {
   "uncle-kim": { code: "DEMO", sponsorship: 0, freeTickets: 2 },
   "macks":     { code: "DEMO", sponsorship: 0, freeTickets: 1 },
-  "kpop":      { code: "DEMO", sponsorship: 0, freeTickets: 1 }
+  "kpop":      { code: "DEMO", sponsorship: 0, freeTickets: 1 },
+  "modeena":   { code: "DEMO", sponsorship: 0, freeTickets: 2, note: "YGVERSE printing needs (in-kind)" }
 };
 
 const MAX_REPS = 12;
@@ -843,7 +865,7 @@ async function verifyBrand(brandKey, code){
   await new Promise(r => setTimeout(r, 400));
   const s = LOCAL_SECRETS[brandKey];
   if (s && code.trim().toUpperCase() === s.code.toUpperCase()){
-    return { ok: true, sponsorship: s.sponsorship, freeTickets: s.freeTickets };
+    return { ok: true, sponsorship: s.sponsorship, freeTickets: s.freeTickets, note: s.note || "" };
   }
   return { ok: false };
 }
@@ -873,7 +895,7 @@ async function unlockBrand(){
     }
 
     // success — store secret + reveal everything
-    state.secret = { sponsorship: res.sponsorship, freeTickets: res.freeTickets };
+    state.secret = { sponsorship: res.sponsorship, freeTickets: res.freeTickets, note: res.note || "" };
     state.code   = code;
 
     const b = BRANDS[state.brand];
@@ -1162,12 +1184,21 @@ function renderInvoice(){
   $("#earlyBird").style.display = showEB ? "flex" : "none";
   if (!c){ inv.innerHTML = ""; return; }
   const b = BRANDS[state.brand];
+  const note = state.secret.note;
+
+  // first row: monetary sponsorship fee, OR an in-kind contribution note
+  const firstRow = note
+    ? `<div class="row free">
+         <div class="desc"><b>${b.name}</b> contribution: ${note}</div>
+         <div class="amt">− in-kind</div>
+       </div>`
+    : `<div class="row">
+         <div class="desc"><b>${b.name}</b> sponsorship fee</div>
+         <div class="amt"><span class="cur">LKR</span>${money(c.sponsorship)}</div>
+       </div>`;
 
   inv.innerHTML = `
-    <div class="row">
-      <div class="desc"><b>${b.name}</b> sponsorship fee</div>
-      <div class="amt"><span class="cur">LKR</span>${money(c.sponsorship)}</div>
-    </div>
+    ${firstRow}
     <div class="row free">
       <div class="desc">Free tickets applied <b>(${c.freeUsed} of ${c.freeTickets})</b></div>
       <div class="amt">− included</div>
@@ -1181,6 +1212,12 @@ function renderInvoice(){
       <div class="amt"><span class="cur">LKR</span>${money(c.total)}</div>
     </div>
   `;
+
+  // when nothing is payable, hide bank + slip upload and show the "no payment" note
+  const needsPayment = c.total > 0;
+  $("#bankBox").style.display   = needsPayment ? "" : "none";
+  $("#slipField").style.display = needsPayment ? "" : "none";
+  $("#noPayMsg").style.display  = needsPayment ? "none" : "block";
 }
 
 /* ============================================================
@@ -1241,10 +1278,11 @@ $("#sponsorForm").addEventListener("submit", async e => {
   if (!phones.length){ ok=false; phoneErr.classList.add("show"); firstBad ??= $("input[data-phone]"); }
   else phoneErr.classList.remove("show");
 
-  // slips
+  // slips — only required when there is an amount to pay
   const slips = $("#slips");
   const slipErr = $("#slipErr");
-  if (!slips.files.length){ ok=false; slipErr.classList.add("show"); firstBad ??= slips; }
+  const needsPayment = (calc()?.total || 0) > 0;
+  if (needsPayment && !slips.files.length){ ok=false; slipErr.classList.add("show"); firstBad ??= slips; }
   else slipErr.classList.remove("show");
 
   if (!ok){
@@ -1319,7 +1357,8 @@ $("#sponsorForm").addEventListener("submit", async e => {
     $("#sponsorForm").style.display = "none";
     $("#done").classList.add("show");
     $("#doneMsg").textContent =
-      `${b.name} · ${c.reps} representative${c.reps>1?'s':''} · Total LKR ${money(c.total)}.`;
+      `${b.name} · ${c.reps} representative${c.reps>1?'s':''} · ` +
+      (c.total > 0 ? `Total LKR ${money(c.total)}.` : `No payment due.`);
     markStep(5);
     window.scrollTo({top:0, behavior:"smooth"});
 
